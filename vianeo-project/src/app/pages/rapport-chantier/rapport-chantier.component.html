@@ -1,0 +1,203 @@
+<!-- ===================== ENTÊTE ===================== -->
+<div class="page-header d-flex align-items-center justify-content-between mb-3">
+  <h2 class="m-0">Rapport de Chantier</h2>
+
+  <div class="d-flex align-items-center gap-2">
+    <span *ngIf="rapportDuJour"
+          class="badge"
+          [ngClass]="{
+            'bg-secondary': rapportDuJour?.statut === 'DRAFT',
+            'bg-warning text-dark': rapportDuJour?.statut === 'EN_ATTENTE_VALIDATION',
+            'bg-success': rapportDuJour?.statut === 'VALIDE',
+            'bg-danger': rapportDuJour?.statut === 'REFUSE'
+          }">
+      {{ rapportDuJour?.statut || '—' }}
+    </span>
+    <div class="alert alert-info py-2">
+  Vous enregistrez les quantités pour : <strong>{{ prettyDayLabel() }}</strong>
+  (colonne <em>{{ currentDayKey().toUpperCase() }}</em>).
+</div>
+
+
+    <button class="btn btn-secondary"
+        (click)="saveAll()"
+        [disabled]="!rapportDuJour || saveBusy || !canSave()">
+  <span *ngIf="!saveBusy">Enregistrer tout</span>
+  <span *ngIf="saveBusy" class="spinner-border spinner-border-sm align-middle" aria-hidden="true"></span>
+  <span *ngIf="saveBusy" class="ms-1">Enregistrement…</span>
+</button>
+
+
+
+    <button class="btn btn-outline-primary"
+            (click)="onSoumettre()"
+            [disabled]="!rapportDuJour || !canSoumettre">
+      Soumettre
+    </button>
+
+    <button class="btn btn-primary"
+            (click)="onValider()"
+            [disabled]="!rapportDuJour || !canValider">
+      Valider
+    </button>
+  </div>
+</div>
+
+
+      <div class="section-card">
+        <div class="section-header"><span>Informations générales</span></div>
+        <div class="section-content">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Date</label>
+              <input type="date" [(ngModel)]="dateJour" (change)="onChangeDate()" />
+            </div>
+            <div class="form-field">
+              <label>Semaine</label>
+              <input type="number" [ngModel]="weekNumber" readonly />
+            </div>
+            <div class="form-field">
+              <label>Chantier</label>
+              <input type="text" [(ngModel)]="chantierLabel" placeholder="Nom du chantier" readonly />
+            </div>
+            <div class="form-field">
+              <label>Responsable</label>
+              <input type="text" [(ngModel)]="responsableNom" placeholder="Nom du responsable" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERSONNEL -->
+      <app-personnel-section
+        title="Personnel Encadrant"
+        [personnel]="personnelEncadrant"
+        [availablePersonnel]="availablePersonnelEncadrant"
+        type="encadrant"
+        (personnelChange)="updatePersonnelEncadrant($event)">
+      </app-personnel-section>
+      <div class="text-end my-2">
+        <button class="btn btn-sm btn-secondary"
+                (click)="savePersonnelEncadrant()"
+                [disabled]="!canSavePersonnelEncadrant()">
+          Enregistrer (Encadrant)
+        </button>
+      </div>
+
+      <app-personnel-section
+        title="Personnel Opérationnel"
+        [personnel]="personnelOperationnel"
+        [availablePersonnel]="availablePersonnelOperationnel"
+        type="operationnel"
+        (personnelChange)="updatePersonnelOperationnel($event)">
+      </app-personnel-section>
+      <div class="text-end my-2">
+        <button class="btn btn-sm btn-secondary"
+                (click)="savePersonnelOperationnel()"
+                [disabled]="!canSavePersonnelOperationnel()">
+          Enregistrer (Opérationnel)
+        </button>
+      </div>
+
+      <!-- INTERIM (fournisseurs: string[]) -->
+      <app-interim-section
+        [interim]="interim"
+        [fournisseurs]="fournisseurs"
+        (interimChange)="updateInterim($event)">
+      </app-interim-section>
+      <div class="text-end my-2">
+        <button class="btn btn-sm btn-secondary"
+                (click)="saveInterim()"
+                [disabled]="!canSaveInterim()">
+          Enregistrer (Intérim)
+        </button>
+      </div>
+
+      <!-- MAT INTERNE : pas de fournisseur -->
+      <app-weekly-qty-section
+        title="Mat Interne"
+        [items]="matInterne"
+        [showSupplier]="false"
+        [articles]="articlesMatInterne"
+        (itemsChange)="matInterne = $event; onSectionChange('matInterne')">
+      </app-weekly-qty-section>
+
+      <div class="text-end my-2">
+        <button class="btn btn-sm btn-secondary"
+                (click)="saveWeeklySection('matInterne')"
+                [disabled]="!canSaveWeekly('matInterne')">
+          Enregistrer (Mat Interne)
+        </button>
+      </div>
+
+      <!-- LOC SANS CHAUFFEUR -->
+      <app-weekly-qty-section
+        title="Loc Mat sans chauffeur"
+        [items]="locSsCh"
+        [showSupplier]="true"
+        [articles]="articlesLocSansCh"
+        [fournisseurs]="fournisseursLocSansCh"
+        (itemsChange)="locSsCh = $event; onSectionChange('locSsCh')">
+      </app-weekly-qty-section>
+
+      <!-- LOC AVEC CHAUFFEUR -->
+      <app-weekly-qty-section
+        title="Loc Mat avec chauffeur"
+        [items]="locAvecCh"
+        [showSupplier]="true"
+        [articles]="articlesLocAvecCh"
+        [fournisseurs]="fournisseursLocAvecCh"
+        (itemsChange)="locAvecCh = $event; onSectionChange('locAvecCh')">
+      </app-weekly-qty-section>
+
+      <!-- TRANSPORT -->
+      <app-weekly-qty-section
+        title="Transport"
+        [items]="transport"
+        [showSupplier]="true"
+        [articles]="articlesTransport"
+        [fournisseurs]="fournisseursTransport"
+        (itemsChange)="transport = $event; onSectionChange('transport')">
+      </app-weekly-qty-section>
+
+      <!-- PRESTATIONS EXTERNES -->
+      <app-weekly-qty-section
+        title="Prestations Ext"
+        [items]="prestaExt"
+        [showSupplier]="true"
+        [articles]="articlesPrestaExt"
+        [fournisseurs]="fournisseursPrestaExt"
+        (itemsChange)="prestaExt = $event; onSectionChange('prestaExt')">
+      </app-weekly-qty-section>
+
+      <!-- MATERIAUX (fournisseur facultatif) -->
+      <app-weekly-qty-section
+        title="Matériaux"
+        [items]="materiaux"
+        [showSupplier]="true"
+        [articles]="articlesMateriaux"
+        [fournisseurs]="fournisseursMateriaux"
+        (itemsChange)="materiaux = $event; onSectionChange('materiaux')">
+      </app-weekly-qty-section>
+
+      <div class="totals-section">
+        <div class="total-row">
+          <span>Total Personnel:</span>
+          <span>{{ totalPersonnel | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="total-row">
+          <span>Total Intérim:</span>
+          <span>{{ totalInterim | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="total-row">
+          <span>Total Général:</span>
+          <span>{{ totalGeneral | currency:'EUR':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-header"><span>Observations</span></div>
+        <div class="section-content">
+          <textarea [(ngModel)]="observations" placeholder="Observations et remarques..." rows="4"></textarea>
+        </div>
+      </div>

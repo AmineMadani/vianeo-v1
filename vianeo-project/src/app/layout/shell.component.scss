@@ -1,0 +1,63 @@
+:host { display:block; height:100dvh; }
+
+.app-root {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  height: 100%;
+  background: #f5f7fb;
+  transition: grid-template-columns .2s ease;
+
+  &.collapsed { grid-template-columns: 72px 1fr; }
+}
+
+.sidebar {
+  position: sticky; top: 0; height: 100dvh;
+  background: linear-gradient(180deg, #1e3a8a, #1d4ed8);
+  color: #fff; display:flex; flex-direction:column; overflow:auto;
+
+  .brand { display:flex; align-items:center; gap:.6rem; padding:16px 14px; font-weight:700; }
+  .brand-icon { font-size:20px; }
+  .brand-text { white-space:nowrap; transition:opacity .2s; }
+
+  .nav { display:flex; flex-direction:column; padding:8px; gap:4px; }
+  .nav a {
+    display:flex; align-items:center; gap:.8rem;
+    color:#e5e7eb; text-decoration:none; padding:10px 12px; border-radius:8px;
+    &:hover { background: rgba(255,255,255,.12); }
+    &.active { background: rgba(255,255,255,.2); color:#fff; }
+  }
+
+  .icon { width:20px; text-align:center; }
+  .label { white-space:nowrap; transition:opacity .2s; }
+
+  .sidebar-footer {
+    margin-top:auto; display:flex; gap:.5rem; padding:12px;
+    .toggle {
+      border:0; border-radius:8px; padding:8px 10px; cursor:pointer;
+      background:#0ea5e9; color:#fff;
+    }
+    .logout {
+      color:#e5e7eb; text-decoration:none; align-self:center;
+      &:hover { text-decoration:underline; }
+    }
+  }
+}
+
+.content { display:flex; flex-direction:column; min-width:0; }
+.topbar {
+  height: 56px; display:flex; align-items:center; gap:8px;
+  padding:0 12px; background:#fff; border-bottom:1px solid #e5e7eb;
+  .burger { border:0; background:#eef2ff; padding:6px 10px; border-radius:8px; cursor:pointer; }
+  .spacer { flex:1; }
+}
+.page { padding:16px; overflow:auto; height: calc(100dvh - 56px); }
+
+/* Mode réduit */
+.app-root.collapsed {
+  .brand-text, .nav .label { opacity:0; pointer-events:none; }
+}
+
+/* Responsive : sous 900px, la sidebar passe en over */
+@media (max-width: 900px) {
+  .app-root { grid-template-columns: 72px 1fr; }
+}

@@ -1,0 +1,73 @@
+<div class="section-card">
+  <div class="section-header" (click)="toggle()">
+    <span>Intérim ({{ interim.length }})</span>
+    <span class="expand-icon" [class.expanded]="expanded">▼</span>
+  </div>
+
+  <div class="section-content" *ngIf="expanded">
+    <!-- En-tête -->
+    <div class="personnel-header"
+         style="display:grid; grid-template-columns: 1.5fr 1fr repeat(6,1.2fr) auto; gap:8px; font-weight:600; margin-bottom:12px; padding:0 12px; color:#6b7280;">
+      <span>Nom Prénom</span>
+      <span>Fournisseur</span>
+      <span>Lu</span><span>Ma</span><span>Me</span><span>Je</span><span>Ve</span><span>Sa</span>
+      <span>Actions</span>
+    </div>
+
+    <!-- Lignes -->
+    <div *ngFor="let person of interim; trackBy: trackByInterim"
+         style="display:grid; grid-template-columns: 1.5fr 1fr repeat(6,1.2fr) auto; gap:8px; align-items:center; padding:12px; background:white; border-radius:8px; margin-bottom:8px; border:1px solid #e5e7eb;">
+      <!-- Nom complet -->
+      <input type="text" [(ngModel)]="person.nom" (change)="updateInterim()" placeholder="Nom complet" class="form-control">
+
+      <!-- Fournisseur -->
+      <select [(ngModel)]="person.fournisseur" (change)="updateInterim()" class="form-control">
+        <option value="">Sélectionner...</option>
+        <option *ngFor="let f of fournisseurs" [value]="f">{{ f }}</option>
+      </select>
+
+      <!-- Jours (heures décimales + switches Nuit/GD) -->
+      <ng-container *ngFor="let day of joursSemaine">
+        <div class="day-cell">
+          <!-- Heures (pas de two-way sur expression: on sépare) -->
+          <input type="number" class="hours-input"
+                 [ngModel]="cell(person, day).heures"
+                 (ngModelChange)="cell(person, day).heures = $event; updateInterim()"
+                 min="0" max="24" step="0.25" placeholder="H">
+          <span class="field-suffix">Heures</span>
+
+          <label class="flag">
+            <input type="checkbox"
+                   [ngModel]="cell(person, day).typePrestation === 'N'"
+                   (ngModelChange)="toggleMode(person, day, 'N')">
+            Nuit
+          </label>
+
+          <label class="flag">
+            <input type="checkbox"
+                   [ngModel]="cell(person, day).typePrestation === 'GD'"
+                   (ngModelChange)="toggleMode(person, day, 'GD')">
+            GD
+          </label>
+        </div>
+      </ng-container>
+
+      <button class="remove-button" (click)="removeInterim(person.id)">×</button>
+    </div>
+
+    <button class="add-button" (click)="addInterim()">
+      <span>+</span> Ajouter intérim
+    </button>
+
+    <div class="totals-section" *ngIf="interim.length">
+      <div class="total-row">
+        <span>Total jours:</span>
+        <span>{{ getTotalJours() }}</span>
+      </div>
+      <div class="total-row">
+        <span>Total coût:</span>
+        <span>{{ getTotalCost() | currency:'EUR':'symbol':'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+</div>

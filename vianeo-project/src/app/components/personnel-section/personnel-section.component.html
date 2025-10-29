@@ -1,0 +1,135 @@
+<div class="section-card">
+  <div class="section-header" (click)="toggle()">
+    <span>{{ title }} ({{ personnel.length }})</span>
+    <span class="expand-icon" [class.expanded]="expanded">▼</span>
+  </div>
+
+  <div class="section-content" *ngIf="expanded" [class.slide-down]="expanded">
+    <!-- En-tête colonnes -->
+    <div
+      class="personnel-header grid-row"
+      style="grid-template-columns: 2fr repeat(6, 1.2fr) auto;"
+    >
+      <span>Nom Prénom</span>
+      <span>Lu</span>
+      <span>Ma</span>
+      <span>Me</span>
+      <span>Je</span>
+      <span>Ve</span>
+      <span>Sa</span>
+      <span>Actions</span>
+    </div>
+
+    <!-- Lignes -->
+    <div
+      *ngFor="let person of personnel; trackBy: trackByPersonnel"
+      class="grid-row person-row"
+      style="grid-template-columns: 2fr repeat(6, 1.2fr) auto;"
+    >
+      <!-- Sélecteur du nom -->
+      <div>
+        <!-- APRÈS : on stocke tout l'objet dans person.personnel -->
+        <!-- AVANT : [(ngModel)]="person.nom" -->
+<!-- APRÈS : on lie l'id vrai d'utilisateur -->
+        <select [(ngModel)]="person.utilisateurId" (ngModelChange)="onSelectUser(person)" class="form-control">
+          <option [ngValue]="null">Sélectionner...</option>
+          <option *ngFor="let p of availablePersonnel" [ngValue]="p.id">
+            {{ p.nom }} {{ p.prenom }}
+          </option>
+        </select>
+
+      </div>
+
+      <!-- Jours -->
+      <ng-container *ngIf="type === 'encadrant'; else opTemplate">
+        <ng-container *ngFor="let day of joursSemaine">
+          <div class="day-cell">
+            <!-- Sélecteur 0 / 0.5 / 1 -->
+            <select
+              class="hours-input"
+              [(ngModel)]="cell(person, day).heures"
+              (ngModelChange)="updatePersonnel()"
+            >
+              <option [ngValue]="0">0</option>
+              <option [ngValue]="0.5">0,5</option>
+              <option [ngValue]="1">1</option>
+            </select>
+            <span class="field-suffix">Jour</span>
+
+            <!-- Cases exclusives : Nuit / GD -->
+            <label class="flag">
+              <input
+                type="checkbox"
+                [ngModel]="cell(person, day).typePrestation === 'N'"
+                (ngModelChange)="toggleEncadrant(person, day, 'N')"
+              />
+              Nuit
+            </label>
+
+            <label class="flag">
+              <input
+                type="checkbox"
+                [ngModel]="cell(person, day).typePrestation === 'GD'"
+                (ngModelChange)="toggleEncadrant(person, day, 'GD')"
+              />
+              GD
+            </label>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <!-- Opérationnel / Intérim -->
+      <ng-template #opTemplate>
+        <ng-container *ngFor="let day of joursSemaine">
+          <div class="day-cell">
+            <input
+              type="number"
+              class="hours-input"
+              [(ngModel)]="cell(person, day).heures"
+              (change)="updatePersonnel()"
+              min="0" max="24" step="0.25" placeholder="H"
+            />
+            <span class="field-suffix">Heures</span>
+
+            <!-- Cases exclusives : Nuit / GD (ou aucune) -->
+            <label class="flag">
+              <input
+                type="checkbox"
+                [ngModel]="cell(person, day).typePrestation === 'N'"
+                (ngModelChange)="toggleBinaire(person, day, 'N')"
+              />
+              Nuit
+            </label>
+
+            <label class="flag">
+              <input
+                type="checkbox"
+                [ngModel]="cell(person, day).typePrestation === 'GD'"
+                (ngModelChange)="toggleBinaire(person, day, 'GD')"
+              />
+              GD
+            </label>
+          </div>
+        </ng-container>
+      </ng-template>
+
+      <button class="remove-button" (click)="removePersonnel(person.id)">×</button>
+    </div>
+
+    <button class="add-button" (click)="addPersonnel()">
+      <span>+</span>
+      Ajouter {{ title.toLowerCase() }}
+    </button>
+
+    <div class="totals-section" *ngIf="personnel.length > 0">
+      <div class="total-row">
+        <span>Total jours:</span>
+        <span>{{ getTotalJours() }}</span>
+      </div>
+      <div class="total-row">
+        <span>Total coût:</span>
+        <span>{{ getTotalCost() | currency:'EUR':'symbol':'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+</div>

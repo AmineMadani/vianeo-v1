@@ -1,0 +1,48 @@
+<div class="app-root" [class.collapsed]="sidebar.collapsed()">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-icon">🛠️</span>
+      <span class="brand-text">Vianeo</span>
+    </div>
+
+    <nav class="nav">
+      <a routerLink="/rapport-chantier" routerLinkActive="active">
+        <span class="icon">📄</span><span class="label">Rapport de Chantier</span>
+      </a>
+      <a routerLink="/entites" routerLinkActive="active">
+        <span class="icon">🏢</span><span class="label">Entités</span>
+      </a>
+      <a routerLink="/fournisseurs" routerLinkActive="active">
+        <span class="icon">🚚</span><span class="label">Fournisseurs</span>
+      </a>
+      <a routerLink="/personnel" routerLinkActive="active">
+        <span class="icon">👷</span><span class="label">Personnel</span>
+      </a>
+      <a routerLink="/articles" routerLinkActive="active">
+        <span class="icon">🧰</span><span class="label">Articles</span>
+      </a>
+      <a routerLink="/chantiers" routerLinkActive="active">
+        <span class="icon">📍</span><span class="label">Chantiers</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="toggle" (click)="toggle()" title="Réduire/Étendre">⟨⟩</button>
+      <a class="logout" routerLink="/logout">Déconnexion</a>
+    </div>
+  </aside>
+
+  <!-- Contenu -->
+  <main class="content">
+    <header class="topbar">
+      <button class="burger" (click)="toggle()" aria-label="Toggle menu">☰</button>
+      <div class="spacer"></div>
+      <!-- place pour actions globales si besoin -->
+    </header>
+
+    <section class="page">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
